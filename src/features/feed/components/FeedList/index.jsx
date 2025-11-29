@@ -43,12 +43,12 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
         <div ref={containerRef} className="relative">
             <div
                 className={cn(
-                    "mt-[90px]",
+                    "mt-[92px]", // Tăng từ 90px lên 92px để thấy được border-top
                     "mb-[50px]",
                     "bg-card shadow-sm",
                     "rounded-t-2xl",
                     "min-h-screen",
-                    "border-l border-r border-border"
+                    "border-l border-r border-t border-border" // Thêm border-top để hiển thị
                 )}
             >
                 <InfiniteScroll
@@ -95,10 +95,10 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
 
             {/* Corner decoration wrapper - chỉ border top, left, right */}
             <div
-                className="fixed z-50 pointer-events-none overflow-hidden"
+                className="fixed z-[55] pointer-events-none overflow-hidden"
                 style={{
                     left: `${offsetLeft}px`,
-                    top: `${112 - 24}px`,
+                    top: `${90 - 24}px`, // Điều chỉnh để match với FeedHeader height (90px)
                     width: `${containerWidth}px`,
                     height: "24px",
                     borderTopLeftRadius: "16px",
@@ -110,13 +110,14 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
             />
 
             {/* === CHE GÓC BO TRÒN === */}
-
+            {/* Các phần tử này sẽ bị che bởi FeedHeader khi cuộn (z-index 70) */}
+            
             {/* Che góc trái - che phần border bo tròn bằng hình vuông với góc được cắt theo đường tròn 16px */}
             <div
-                className="fixed z-[60] pointer-events-none"
+                className="fixed z-[55] pointer-events-none"
                 style={{
                     left: `${offsetLeft - 1}px`,
-                    top: `${112 - 24 - 1}px`,
+                    top: `${90 - 24}px`, // Điều chỉnh để match với FeedHeader height (90px)
                     width: "18px",
                     height: "18px",
                     background: "hsl(var(--background))",
@@ -127,10 +128,10 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
 
             {/* Che góc phải - che phần border bo tròn bằng hình vuông với góc được cắt theo đường tròn 16px */}
             <div
-                className="fixed z-[60] pointer-events-none"
+                className="fixed z-[55] pointer-events-none"
                 style={{
                     left: `${offsetLeft + containerWidth - 17}px`,
-                    top: `${112 - 24 - 1}px`,
+                    top: `${90 - 24}px`, // Điều chỉnh để match với FeedHeader height (90px)
                     width: "18px",
                     height: "18px",
                     background: "hsl(var(--background))",

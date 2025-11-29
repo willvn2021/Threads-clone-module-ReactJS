@@ -35,14 +35,30 @@ const FeedHeader = ({ currentFeedType, onFeedTypeChange }) => {
 
             {/* Header fixed với overflow hidden để che border */}
             <header
-                className="fixed top-0 h-[90px] z-50 bg-background/95 backdrop-blur-md overflow-hidden"
+                className="fixed top-0 h-[90px] z-[70] bg-background/95 backdrop-blur-md overflow-hidden shadow-none"
                 style={{
-                    left: `${offsetLeft - 2}px`,
-                    width: `${width + 4}px`,
+                    left: `${offsetLeft - 2}px`, // Giảm 2px để che viền trái khi cuộn
+                    width: `${width + 4}px`, // Tăng 2px mỗi bên (tổng 4px) để che viền phải khi cuộn
                     opacity: isReady ? 1 : 0, // Ẩn cho đến khi ready
                 }}
             >
-                <div className="h-full flex items-center justify-center gap-8 px-6">
+                {/* Che góc dưới trái để match với FeedList rounded corner - tăng kích thước để che hoàn toàn */}
+                <div
+                    className="absolute bottom-0 left-0 w-[18px] h-[18px] bg-background/95 backdrop-blur-md"
+                    style={{
+                        borderBottomLeftRadius: "16px",
+                    }}
+                />
+                
+                {/* Che góc dưới phải để match với FeedList rounded corner - tăng kích thước để che hoàn toàn */}
+                <div
+                    className="absolute bottom-0 right-0 w-[18px] h-[18px] bg-background/95 backdrop-blur-md"
+                    style={{
+                        borderBottomRightRadius: "16px",
+                    }}
+                />
+
+                <div className="h-full flex items-center justify-center gap-8 px-6 relative z-10">
                     <button
                         onClick={() => onFeedTypeChange("for_you")}
                         className={cn(
