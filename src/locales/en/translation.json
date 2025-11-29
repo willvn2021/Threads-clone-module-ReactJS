@@ -1,0 +1,19 @@
+{
+    "nav": {
+        "home": "Home",
+        "search": "Search",
+        "create": "Create",
+        "activity": "Activity",
+        "profile": "Profile"
+    },
+    "feed": {
+        "title": "Home"
+    },
+    "post": {
+        "timeAgo": {
+            "hours": "{{count}}h",
+            "days": "{{count}} days",
+            "minutes": "{{count}}m"
+        }
+    }
+}
