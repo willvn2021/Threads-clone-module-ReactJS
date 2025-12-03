@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import ProtectedAction from "@/components/common/ProtectedAction";
 import {
@@ -10,13 +11,22 @@ import {
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToggleLike } from "@/features/post/hooks/useToggleLike";
+import { useToggleRepost } from "@/features/post/hooks/useToggleRepost";
+import QuoteModal from "@/components/post/QuoteModal";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 
 const PostCard = ({ post, isLast, isFirst }) => {
     const dispatch = useDispatch();
+    const [isRepostMenuOpen, setIsRepostMenuOpen] = useState(false);
+    const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
     const {
         id,
@@ -25,15 +35,22 @@ const PostCard = ({ post, isLast, isFirst }) => {
         created_at,
         likes_count: initialLikesCount,
         replies_count,
-        reposts_and_quotes_count,
+        reposts_and_quotes_count: initialRepostsCount,
         user,
         original_post,
         is_quote,
     } = post;
 
     const { isLiked, likesCount, handleToggleLike } = useToggleLike(id);
+    const { isReposted, repostsCount, handleToggleRepost } =
+        useToggleRepost(id);
+
     //Hiển thị giá trị likes từ Redux trước, sau đó fallback về giá trị thật từ API
     const displayLikesCount = likesCount > 0 ? likesCount : initialLikesCount;
+    // Fix: Ưu tiên Redux count nếu đã được khởi tạo, nếu không thì dùng initialRepostsCount
+    const displayRepostsCount = repostsCount !== undefined && repostsCount >= 0
+        ? repostsCount
+        : initialRepostsCount;
 
     //Format time hiển thị
     const getTimeAgo = (timestamp) => {
@@ -45,6 +62,16 @@ const PostCard = ({ post, isLast, isFirst }) => {
         } catch (error) {
             return timestamp;
         }
+    };
+
+    const handleRepostClick = () => {
+        handleToggleRepost();
+        setIsRepostMenuOpen(false);
+    };
+
+    const handleQuoteClick = () => {
+        setIsRepostMenuOpen(false);
+        setIsQuoteModalOpen(true);
     };
     return (
         <>
@@ -135,7 +162,7 @@ const PostCard = ({ post, isLast, isFirst }) => {
                                 </div>
                             )}
 
-                            {/* Quote Post - Hiển thị original_post nếu is_quote = true */}
+                            {/* Quote Post */}
                             {is_quote && original_post && (
                                 <div className="mb-3 border border-border rounded-xl p-3 bg-card/50">
                                     <div className="flex gap-2 items-start">
@@ -232,21 +259,61 @@ const PostCard = ({ post, isLast, isFirst }) => {
 
                                 {/* Repost Button */}
                                 <ProtectedAction>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className={cn(
-                                            "h-9 gap-1.5 px-2.5 rounded-full transition-colors",
-                                            "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                                        )}
+                                    <Popover
+                                        open={isRepostMenuOpen}
+                                        onOpenChange={setIsRepostMenuOpen}
                                     >
-                                        <Repeat2 className="size-5" />
-                                        {reposts_and_quotes_count > 0 && (
-                                            <span className="text-sm font-normal">
-                                                {reposts_and_quotes_count}
-                                            </span>
-                                        )}
-                                    </Button>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className={cn(
+                                                    "h-9 gap-1.5 px-2.5 rounded-full transition-colors",
+                                                    isReposted
+                                                        ? "text-green-600 hover:text-green-700 [&>svg]:text-green-600 hover:[&>svg]:text-green-700"
+                                                        : "text-muted-foreground hover:text-foreground",
+                                                    "hover:bg-secondary"
+                                                )}
+                                            >
+                                                <Repeat2 className="size-5" />
+                                                {displayRepostsCount > 0 && (
+                                                    <span className="text-sm font-normal">
+                                                        {displayRepostsCount}
+                                                    </span>
+                                                )}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-48 p-1"
+                                            align="start"
+                                            side="bottom"
+                                        >
+                                            <div className="flex flex-col gap-0.5">
+                                                <Button
+                                                    variant="ghost"
+                                                    className={cn(
+                                                        "justify-start h-11 px-3 font-semibold text-foreground hover:bg-secondary hover:text-foreground cursor-pointer [&>svg]:text-foreground",
+                                                        isReposted &&
+                                                            "text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 [&>svg]:text-red-600 hover:[&>svg]:text-red-700"
+                                                    )}
+                                                    onClick={handleRepostClick}
+                                                >
+                                                    <Repeat2 className="size-5 mr-2" />
+                                                    {isReposted
+                                                        ? "Remove"
+                                                        : "Repost"}
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    className="justify-start h-11 px-3 font-semibold text-foreground hover:bg-secondary hover:text-foreground [&>svg]:text-foreground cursor-pointer"
+                                                    onClick={handleQuoteClick}
+                                                >
+                                                    <MessageCircle className="size-5 mr-2" />
+                                                    Quote
+                                                </Button>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
                                 </ProtectedAction>
 
                                 {/* Share Button */}
@@ -267,6 +334,13 @@ const PostCard = ({ post, isLast, isFirst }) => {
                     </div>
                 </div>
             </Card>
+
+            {/* Quote Modal */}
+            <QuoteModal
+                isOpen={isQuoteModalOpen}
+                onClose={() => setIsQuoteModalOpen(false)}
+                originalPost={post}
+            />
         </>
     );
 };

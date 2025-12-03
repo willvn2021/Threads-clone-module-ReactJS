@@ -4,7 +4,12 @@ import PostCard from "@/features/post/components/PostCard";
 import CreatePost from "@/features/post/components/CreatePost";
 import { cn } from "@/lib/utils";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { setInitialLikesCount } from "@/features/post/postSlice";
+import {
+    setInitialLikesCount,
+    setInitialRepostsCount,
+    restoreLikedPostsFromFeed,
+    restoreRepostedPostsFromFeed,
+} from "@/features/post/postSlice";
 
 const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
     const dispatch = useDispatch();
@@ -15,6 +20,9 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
     useEffect(() => {
         if (posts && posts.length > 0) {
             dispatch(setInitialLikesCount(posts));
+            dispatch(setInitialRepostsCount(posts));
+            dispatch(restoreLikedPostsFromFeed(posts));
+            dispatch(restoreRepostedPostsFromFeed(posts));
         }
     }, [posts, dispatch]);
 
