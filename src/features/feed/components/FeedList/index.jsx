@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import PostCard from "@/features/post/components/PostCard";
 import CreatePost from "@/features/post/components/CreatePost";
@@ -11,9 +11,14 @@ import {
     restoreRepostedPostsFromFeed,
 } from "@/features/post/postSlice";
 
-const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
+const FeedList = ({
+    posts,
+    fetchMorePosts,
+    hasMore,
+    loading,
+    containerRef,
+}) => {
     const dispatch = useDispatch();
-    const containerRef = useRef(null);
     const [offsetLeft, setOffsetLeft] = useState(0);
     const [containerWidth, setContainerWidth] = useState(720);
 
@@ -27,6 +32,8 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
     }, [posts, dispatch]);
 
     useEffect(() => {
+        if (!containerRef?.current) return;
+
         const updateOffset = () => {
             if (containerRef.current) {
                 const rect = containerRef.current.getBoundingClientRect();
@@ -35,25 +42,49 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
             }
         };
 
-        // Đảm bảo tính toán sau khi layout hoàn tất
-        const timeoutId = setTimeout(updateOffset, 0);
+        let resizeObserver = null;
+        let timeoutId = null;
 
-        // Tính toán lại khi resize
-        window.addEventListener("resize", updateOffset);
+        // Dùng callback để đảm bảo element đã mount
+        const checkAndUpdate = () => {
+            if (containerRef.current) {
+                // Đo ngay lập tức với double RAF để đảm bảo sau khi paint
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(updateOffset);
+                });
+
+                // Sau đó dùng ResizeObserver để theo dõi thay đổi
+                resizeObserver = new ResizeObserver(() => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(updateOffset);
+                    });
+                });
+
+                resizeObserver.observe(containerRef.current);
+                window.addEventListener("resize", updateOffset);
+            } else {
+                // Nếu chưa mount, đợi một chút rồi thử lại
+                timeoutId = setTimeout(checkAndUpdate, 10);
+            }
+        };
+
+        // Đợi một chút để đảm bảo DOM đã render xong
+        timeoutId = setTimeout(checkAndUpdate, 0);
 
         return () => {
-            clearTimeout(timeoutId);
+            if (timeoutId) clearTimeout(timeoutId);
+            if (resizeObserver) resizeObserver.disconnect();
             window.removeEventListener("resize", updateOffset);
         };
-    }, []);
+    }, [containerRef]);
 
     return (
-        <div ref={containerRef} className="relative">
+        <div className="relative">
             <div
                 className={cn(
                     "mt-[92px]", // Tăng từ 90px lên 92px để thấy được border-top
                     "mb-[50px]",
-                    "bg-card shadow-sm",
+                    "bg-card",
                     "rounded-t-2xl",
                     "min-h-screen",
                     "border-l border-r border-t border-border" // Thêm border-top để hiển thị
@@ -119,7 +150,7 @@ const FeedList = ({ posts, fetchMorePosts, hasMore, loading }) => {
 
             {/* === CHE GÓC BO TRÒN === */}
             {/* Các phần tử này sẽ bị che bởi FeedHeader khi cuộn (z-index 70) */}
-            
+
             {/* Che góc trái - che phần border bo tròn bằng hình vuông với góc được cắt theo đường tròn 16px */}
             <div
                 className="fixed z-[55] pointer-events-none"

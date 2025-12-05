@@ -1,59 +1,84 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const FeedHeader = ({ currentFeedType, onFeedTypeChange }) => {
-    const parentRef = useRef(null);
+const FeedHeader = ({ currentFeedType, onFeedTypeChange, containerRef }) => {
     const [offsetLeft, setOffsetLeft] = useState(0);
     const [width, setWidth] = useState(720);
     const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
+        if (!containerRef?.current) return;
+
         const updateDimensions = () => {
-            if (parentRef.current) {
-                const rect = parentRef.current.getBoundingClientRect();
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
                 setOffsetLeft(rect.left);
                 setWidth(rect.width);
                 setIsReady(true); // Đánh dấu đã sẵn sàng
             }
         };
 
-        const timeoutId = setTimeout(updateDimensions, 0); // Tương tự fix FeedList
-        window.addEventListener("resize", updateDimensions);
+        let resizeObserver = null;
+        let timeoutId = null;
+
+        // Dùng callback để đảm bảo element đã mount
+        const checkAndUpdate = () => {
+            if (containerRef.current) {
+                // Đo ngay lập tức với double RAF để đảm bảo sau khi paint
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(updateDimensions);
+                });
+
+                // Sau đó dùng ResizeObserver để theo dõi thay đổi
+                resizeObserver = new ResizeObserver(() => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(updateDimensions);
+                    });
+                });
+
+                resizeObserver.observe(containerRef.current);
+                window.addEventListener("resize", updateDimensions);
+            } else {
+                // Nếu chưa mount, đợi một chút rồi thử lại
+                timeoutId = setTimeout(checkAndUpdate, 10);
+            }
+        };
+
+        // Đợi một chút để đảm bảo DOM đã render xong
+        timeoutId = setTimeout(checkAndUpdate, 0);
+
         return () => {
-            clearTimeout(timeoutId);
+            if (timeoutId) clearTimeout(timeoutId);
+            if (resizeObserver) resizeObserver.disconnect();
             window.removeEventListener("resize", updateDimensions);
         };
-    }, []);
+    }, [containerRef]);
 
     return (
         <>
-            {/* Invisible reference div to measure parent width */}
-            <div
-                ref={parentRef}
-                className="absolute top-0 w-full h-0 pointer-events-none"
-            />
-
             {/* Header fixed với overflow hidden để che border */}
             <header
-                className="fixed top-0 h-[90px] z-[70] bg-background/95 backdrop-blur-md overflow-hidden shadow-none"
+                className="fixed top-0 h-[90px] z-[70] bg-background overflow-hidden "
                 style={{
-                    left: `${offsetLeft - 2}px`, // Giảm 2px để che viền trái khi cuộn
-                    width: `${width + 4}px`, // Tăng 2px mỗi bên (tổng 4px) để che viền phải khi cuộn
+                    left: `${offsetLeft - 1}px`,
+                    width: `${width + 2}px`,
                     opacity: isReady ? 1 : 0, // Ẩn cho đến khi ready
                 }}
             >
-                {/* Che góc dưới trái để match với FeedList rounded corner - tăng kích thước để che hoàn toàn */}
+                {/* Che góc dưới trái để match với FeedList rounded corner */}
                 <div
-                    className="absolute bottom-0 left-0 w-[18px] h-[18px] bg-background/95 backdrop-blur-md"
+                    className="absolute bottom-0 left-0 w-[20px] h-[20px] bg-background"
                     style={{
+                        left: "-1px",
                         borderBottomLeftRadius: "16px",
                     }}
                 />
-                
+
                 {/* Che góc dưới phải để match với FeedList rounded corner - tăng kích thước để che hoàn toàn */}
                 <div
-                    className="absolute bottom-0 right-0 w-[18px] h-[18px] bg-background/95 backdrop-blur-md"
+                    className="absolute bottom-0 right-0 w-[20px] h-[20px] bg-background/95"
                     style={{
+                        right: "-1px",
                         borderBottomRightRadius: "16px",
                     }}
                 />

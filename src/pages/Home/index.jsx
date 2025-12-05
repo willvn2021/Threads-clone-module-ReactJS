@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import FeedHeader from "@/features/feed/components/FeedHeader";
 import FeedList from "@/features/feed/components/FeedList";
 import AuthCard from "@/features/auth/components/AuthCard";
@@ -36,6 +36,7 @@ const HomePage = () => {
     const isInitializing = useSelector(selectIsInitializing);
 
     const [currentFeedType, setCurrentFeedType] = useState("for_you");
+    const feedContainerRef = useRef(null);
 
     // Restore liked posts từ localStorage khi component mount
     useEffect(() => {
@@ -140,10 +141,11 @@ const HomePage = () => {
                 )}
             >
                 {/* Feed Column - Left */}
-                <div className="w-full relative">
+                <div ref={feedContainerRef} className="w-full relative">
                     <FeedHeader
                         currentFeedType={currentFeedType}
                         onFeedTypeChange={setCurrentFeedType}
+                        containerRef={feedContainerRef}
                     />
 
                     {loading && posts.length === 0 ? (
@@ -159,6 +161,7 @@ const HomePage = () => {
                             fetchMorePosts={fetchMorePosts}
                             hasMore={hasMore}
                             loading={loading}
+                            containerRef={feedContainerRef}
                         />
                     )}
                 </div>
