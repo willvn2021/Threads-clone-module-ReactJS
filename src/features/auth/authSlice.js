@@ -1,3 +1,4 @@
+import axiosInstance from "@/lib/axios";
 import { createSlice } from "@reduxjs/toolkit";
 
 //Init State
@@ -78,10 +79,9 @@ const authSlice = createSlice({
         },
 
         //Logout action
-        logout: (state) => {
-            state.user = null;
-            state.isAuthenticated = false;
-            state.isInitializing = false;
+        logout: async () => {
+            const response = await axiosInstance.post("/api/auth/logout");
+            return response.data;
         },
 
         //Restore user từ localStorage khi app khởi động

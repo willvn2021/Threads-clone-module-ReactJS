@@ -19,6 +19,23 @@ const resources = {
             feed: {
                 title: "Home",
             },
+            menu: {
+                tooltip: "Menu",
+                appearance: "Appearance",
+                insights: "Insights",
+                settings: "Settings",
+                feeds: "Feeds",
+                saved: "Saved",
+                liked: "Liked",
+                report: "Report a problem",
+                logout: "Log out",
+            },
+            auth: {
+                notLoggedIn: "You are not logged in",
+                logoutSuccess: "Logged out successfully!",
+                logoutFailed: "Logout failed",
+                loggingOut: "Logging out...",
+            },
         },
     },
     vi: {
@@ -37,6 +54,23 @@ const resources = {
             },
             feed: {
                 title: "Trang chủ",
+            },
+            menu: {
+                tooltip: "Menu",
+                appearance: "Appearance",
+                insights: "Insights",
+                settings: "Settings",
+                feeds: "Feeds",
+                saved: "Đã lưu",
+                liked: "Liked",
+                report: "Report a problem",
+                logout: "Log out",
+            },
+            auth: {
+                notLoggedIn: "Bạn chưa đăng nhập",
+                logoutSuccess: "Đăng xuất thành công!",
+                logoutFailed: "Đăng xuất thất bại",
+                loggingOut: "Đang đăng xuất...",
             },
         },
     },

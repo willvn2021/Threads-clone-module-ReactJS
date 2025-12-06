@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { Home, Search, Heart, User, Plus, Pin } from "lucide-react";
@@ -6,6 +5,7 @@ import Logo from "@/components/common/Logo";
 import SidebarItem from "@/components/sidebar/SidebarItem";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 import ThemeToggle from "@/components/common/ThemeToggle";
+import ProfileMenu from "@/components/sidebar/ProfileMenu";
 
 const Sidebar = () => {
     const { t } = useTranslation();
@@ -78,6 +78,7 @@ const Sidebar = () => {
                     isActive={location.pathname === "/saved"}
                     requireAuth={true}
                 />
+                <ProfileMenu />
             </div>
 
             {/* Language Switcher - Bottom */}
