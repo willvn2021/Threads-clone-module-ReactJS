@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { useToggleLike } from "@/features/post/hooks/useToggleLike";
 import { useToggleRepost } from "@/features/post/hooks/useToggleRepost";
 import QuoteModal from "@/components/post/QuoteModal";
+import ShareMenu from "@/features/post/components/ShareMenu";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -48,9 +49,10 @@ const PostCard = ({ post, isLast, isFirst }) => {
     //Hiển thị giá trị likes từ Redux trước, sau đó fallback về giá trị thật từ API
     const displayLikesCount = likesCount > 0 ? likesCount : initialLikesCount;
     // Fix: Ưu tiên Redux count nếu đã được khởi tạo, nếu không thì dùng initialRepostsCount
-    const displayRepostsCount = repostsCount !== undefined && repostsCount >= 0
-        ? repostsCount
-        : initialRepostsCount;
+    const displayRepostsCount =
+        repostsCount !== undefined && repostsCount >= 0
+            ? repostsCount
+            : initialRepostsCount;
 
     //Format time hiển thị
     const getTimeAgo = (timestamp) => {
@@ -59,7 +61,7 @@ const PostCard = ({ post, isLast, isFirst }) => {
                 addSuffix: true,
                 locale: vi,
             });
-        } catch (error) {
+        } catch {
             return timestamp;
         }
     };
@@ -318,16 +320,18 @@ const PostCard = ({ post, isLast, isFirst }) => {
 
                                 {/* Share Button */}
                                 <ProtectedAction>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className={cn(
-                                            "h-9 gap-1.5 px-2.5 rounded-full transition-colors",
-                                            "text-muted-foreground hover:text-foreground hover:bg-secondary"
-                                        )}
-                                    >
-                                        <Send className="size-5" />
-                                    </Button>
+                                    <ShareMenu post={post}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={cn(
+                                                "h-9 gap-1.5 px-2.5 rounded-full transition-colors",
+                                                "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                                            )}
+                                        >
+                                            <Send className="size-5" />
+                                        </Button>
+                                    </ShareMenu>
                                 </ProtectedAction>
                             </div>
                         </div>

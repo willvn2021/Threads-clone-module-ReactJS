@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { selectUser, selectIsAuthenticated } from "@/features/auth/authSlice";
 import CreatePostModal from "../CreatePostModal";
 
 const CreatePost = () => {
+    const { t } = useTranslation();
     const user = useSelector(selectUser);
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,7 +36,7 @@ const CreatePost = () => {
                         className="flex-1 text-left px-4 py-3 rounded-lg border border-border hover:bg-accent transition-colors"
                     >
                         <span className="text-muted-foreground">
-                            What's new?
+                            {t("post.createPlaceholder")}
                         </span>
                     </button>
                 </div>
